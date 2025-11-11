@@ -1,0 +1,7 @@
+[project]
+name = "tfviz"
+version = "0.1.0"
+description = "A simple, fast CLI tool for generating PNG visualizations of your Terraform infrastructure."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
