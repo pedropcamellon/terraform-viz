@@ -1,6 +1,6 @@
 version = 1
 revision = 3
-requires-python = "==3.13.3"
+requires-python = ">=3.10"
 
 [[package]]
 name = "markdown-it-py"
@@ -47,11 +47,11 @@ wheels = [
 
 [[package]]
 name = "terraform-viz"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "rich" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "rich", specifier = "==13.7.0" }]
+requires-dist = [{ name = "rich", specifier = ">=13.7.0" }]
