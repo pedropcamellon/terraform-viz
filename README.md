@@ -1,5 +1,9 @@
 # tfviz - Terraform Infrastructure Visualizer
 
+[![PyPI version](https://badge.fury.io/py/tfviz.svg)](https://badge.fury.io/py/tfviz)
+[![Python Support](https://img.shields.io/pypi/pyversions/tfviz.svg)](https://pypi.org/project/tfviz/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A simple, fast CLI tool for generating PNG visualizations of your Terraform infrastructure.
 
 ## Overview
@@ -9,57 +13,84 @@ A simple, fast CLI tool for generating PNG visualizations of your Terraform infr
 ## Features
 
 - 🎨 **PNG output** - High-quality visualizations ready for documentation
-- 🔍 **Auto-detection** - Finds Terraform and Graphviz automatically
-- 📁 **Flexible paths** - Work with any Terraform directory
+- 🔍 **Flexible paths** - Work with any Terraform directory
+- 📦 **Plan support** - Visualize specific plan files
 - 🧹 **Clean operation** - Optional intermediate file cleanup
-- 💬 **Verbose mode** - Detailed progress information
+- 💬 **Verbose mode** - Detailed progress information with Rich formatting
 - ❌ **Error handling** - Clear error messages and suggestions
+- 🎯 **Custom spacing** - Adjustable node padding for optimal layouts
 
 ## Installation
 
+### From PyPI (Recommended)
+
+```bash
+pip install tfviz
+# or
+uv add tfviz
+```
+
+### From Source
+
+```bash
+git clone https://github.com/yourusername/tfviz.git
+cd tfviz
+uv pip install -e .
+```
+
 ### Prerequisites
 
-1. **Terraform** - Available in PATH
-2. **Graphviz** - Install with: `winget install graphviz`
-3. **Python packages** - Managed by UV in this project
+1. **Terraform** - Must be available in PATH or specify path with `--tf-path`
+2. **Graphviz** - Install with: `winget install graphviz` (Windows) or `brew install graphviz` (macOS)
+
+## Usage
 
 ### Quick Start
 
 ```bash
-# Basic usage - generates terraform_graph.png
-uv run python tfviz.py
+# Basic usage - generates timestamped PNG in output/
+tfviz
 
 # Custom output filename  
-uv run python tfviz.py -o infrastructure.png
+tfviz -o infrastructure.png
 
 # Work with different Terraform directory
-uv run python tfviz.py --terraform-dir ../production
+tfviz --tf-dir ../production
+
+# Visualize a specific plan file
+tfviz --plan-file tfplan
+
+# Specify custom Terraform executable
+tfviz --tf-path /path/to/terraform
 
 # Verbose output with intermediate files kept
-uv run python tfviz.py -v --keep-dot
+tfviz -v --keep-dot
+
+# Adjust spacing between nodes
+tfviz --node-padding 1.5
 ```
 
 ## Command Line Options
 
 ```
-usage: tfviz.py [-h] [-o OUTPUT] [--terraform-dir TERRAFORM_DIR] [--keep-dot] [--verbose]
+usage: tfviz [-h] [-o OUTPUT] [--tf-dir TF_DIR] [--tf-path TF_PATH] 
+             [--keep-dot] [--verbose] [--node-padding NODE_PADDING] 
+             [--plan-file PLAN_FILE]
 
 Generate PNG visualization of Terraform infrastructure
 
 options:
   -h, --help            show this help message and exit
   -o OUTPUT, --output OUTPUT
-                        Output PNG filename (default: terraform_graph.png)
-  --terraform-dir TERRAFORM_DIR
-                        Directory containing Terraform files (default: current directory)
+                        Output PNG filename (default: auto-generated with timestamp)
+  --tf-dir TF_DIR       Directory containing Terraform files (default: current directory)
+  --tf-path TF_PATH     Path to Terraform executable or alias (default: terraform)
   --keep-dot            Keep intermediate DOT file after rendering
   --verbose, -v         Enable verbose output
-
-Examples:
-  tfviz.py                          # Generate terraform_graph.png in current directory
-  tfviz.py -o my_infra.png          # Generate with custom output filename
-  tfviz.py --keep-dot               # Keep intermediate DOT file
-  tfviz.py --terraform-dir ../dev   # Use Terraform files from different directory
+  --node-padding NODE_PADDING
+                        Spacing between nodes (default: 1.0, larger = more spaced out)
+  --plan-file PLAN_FILE
+                        Path to Terraform plan file to visualize (optional)
 ```
 
 ## How It Works
