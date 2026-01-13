@@ -3,6 +3,10 @@
 import subprocess
 from pathlib import Path
 
+from rich.console import Console
+
+console = Console()
+
 
 class ImageRenderer:
     """Renders DOT files to PNG images."""
@@ -15,14 +19,17 @@ class ImageRenderer:
         self, dot_file: Path, output_file: Path, node_padding: float = 1.0
     ) -> None:
         """Render DOT file to PNG using Graphviz."""
-        if self.verbose:
-            print("🎨 Rendering PNG visualization...")
+        with console.status(
+            "[magenta]Rendering PNG visualization...[/]", spinner="dots"
+        ):
+            if self.verbose:
+                console.print("[cyan]>>>[/] Rendering PNG visualization...")
 
-        try:
-            cmd = self._build_render_command(dot_file, output_file, node_padding)
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Failed to render PNG: {e}")
+            try:
+                cmd = self._build_render_command(dot_file, output_file, node_padding)
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"Failed to render PNG: {e}")
 
     def _build_render_command(
         self, dot_file: Path, output_file: Path, node_padding: float

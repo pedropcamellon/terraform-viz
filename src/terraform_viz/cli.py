@@ -6,8 +6,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from rich.console import Console
+
 from .config import TFVizConfig
 from .orchestrator import TFVizOrchestrator
+
+console = Console()
 
 
 def create_config_from_args(args: argparse.Namespace) -> TFVizConfig:
@@ -98,8 +102,51 @@ Examples:
     return parser.parse_args()
 
 
+def show_welcome():
+    """Display welcome screen with MS-DOS style."""
+    from rich.panel import Panel
+    from rich.table import Table
+    
+    console.print()
+    console.print(Panel.fit(
+        "[bold cyan]TERRAFORM-VIZ[/bold cyan]\n"
+        "[white]Infrastructure Visualization Tool[/white]\n"
+        "[dim]v0.1.1[/dim]",
+        border_style="cyan",
+        padding=(1, 2)
+    ))
+    
+    console.print()
+    console.print("[bold white]QUICK START[/bold white]")
+    console.print("[cyan]  >[/] [white]terraform-viz[/]                    [dim]# Generate visualization with auto-name[/]")
+    console.print("[cyan]  >[/] [white]terraform-viz -o infra.png[/]       [dim]# Custom output filename[/]")
+    console.print("[cyan]  >[/] [white]terraform-viz --verbose[/]          [dim]# Show detailed progress[/]")
+    console.print()
+    
+    table = Table(show_header=True, header_style="bold cyan", border_style="dim")
+    table.add_column("Option", style="yellow")
+    table.add_column("Description", style="white")
+    
+    table.add_row("--help", "Show all available options")
+    table.add_row("--tf-path PATH", "Path to terraform executable")
+    table.add_row("--tf-dir DIR", "Directory with terraform files")
+    table.add_row("--plan-file FILE", "Visualize specific plan file")
+    table.add_row("--node-padding N", "Adjust spacing between nodes")
+    table.add_row("--keep-dot", "Keep intermediate DOT file")
+    
+    console.print(table)
+    console.print()
+    console.print("[dim]Run with [cyan]--help[/cyan] for detailed usage information[/dim]")
+    console.print()
+
+
 def main():
     """Main CLI entry point - orchestrates the visualization process."""
+    # Show welcome screen if no arguments provided
+    if len(sys.argv) == 1:
+        show_welcome()
+        sys.exit(0)
+    
     args = parse_arguments()
 
     try:
@@ -108,21 +155,21 @@ def main():
         orchestrator.execute()
 
     except FileNotFoundError as e:
-        print(f"❌ Error: {e}")
+        console.print(f"[bold red][ ERROR ][/] {e}")
         if "Graphviz" in str(e):
-            print("💡 Install Graphviz with: winget install graphviz")
+            console.print("[yellow][ INFO  ][/] Install Graphviz with: [cyan]winget install graphviz[/]")
         sys.exit(1)
 
     except RuntimeError as e:
-        print(f"❌ Error: {e}")
+        console.print(f"[bold red][ ERROR ][/] {e}")
         sys.exit(1)
 
     except KeyboardInterrupt:
-        print("\n❌ Operation cancelled by user")
+        console.print("\n[bold red][ ABORT ][/] Operation cancelled by user")
         sys.exit(1)
 
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        console.print(f"[bold red][ ERROR ][/] Unexpected error: {e}")
         if args.verbose:
             import traceback
             traceback.print_exc()

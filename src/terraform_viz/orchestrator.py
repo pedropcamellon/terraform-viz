@@ -2,11 +2,15 @@
 
 from pathlib import Path
 
+from rich.console import Console
+
 from .config import TFVizConfig
 from .executables import ExecutableFinder
 from .file_manager import FileManager
 from .graph_generator import GraphGenerator
 from .renderer import ImageRenderer
+
+console = Console()
 
 
 class TFVizOrchestrator:
@@ -20,13 +24,15 @@ class TFVizOrchestrator:
         """Execute the full visualization pipeline."""
         # Find required executables
         if self.config.verbose:
-            print("🔍 Locating required executables...")
+            console.print("[cyan]>>>[/] Locating required executables...")
 
         dot_path = ExecutableFinder.find_graphviz()
 
         if self.config.verbose:
-            print(f"✅ Found Graphviz: {dot_path}")
-            print(f"✅ Using Terraform: {self.config.tf_path}")
+            console.print(f"[cyan]>>>[/] Found Graphviz: [white]{dot_path}[/]")
+            console.print(
+                f"[cyan]>>>[/] Using Terraform: [white]{self.config.tf_path}[/]"
+            )
 
         # Change to target directory
         original_dir = self.file_manager.change_directory(self.config.tf_dir)
@@ -60,12 +66,15 @@ class TFVizOrchestrator:
             # Return to original directory
             if Path.cwd() != original_dir:
                 import os
+
                 os.chdir(original_dir)
 
     def _report_success(self) -> None:
         """Report successful generation."""
-        print(f"✅ Successfully generated: {self.config.output_path}")
+        console.print(
+            f"[bold green][ OK    ][/] Successfully generated: [white]{self.config.output_path}[/]"
+        )
 
         if self.config.output_path.exists():
             size_mb = self.file_manager.get_file_size_mb(self.config.output_path)
-            print(f"📊 File size: {size_mb:.2f} MB")
+            console.print(f"[cyan][ INFO  ][/] File size: [white]{size_mb:.2f} MB[/]")
