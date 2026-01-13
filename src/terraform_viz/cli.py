@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Command-line interface for tfviz."""
+"""Command-line interface for terraform-viz."""
 
 import argparse
 import sys
@@ -40,12 +40,12 @@ def parse_arguments() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  tfviz                                  # Generate MMDDYY_HHMM_infra_graph.png
-  tfviz -o my_infra.png                  # Custom output filename  
-  tfviz --plan-file tfplan               # Visualize specific plan file
-  tfviz --tf-path C:\\tools\\tf.exe        # Specify TF executable path
-  tfviz --node-padding 1.5               # More spacing between nodes
-  tfviz --tf-dir ../dev                  # Use TF files from different directory
+  terraform-viz                                  # Generate MMDDYY_HHMM_infra_graph.png
+  terraform-viz -o my_infra.png                  # Custom output filename  
+  terraform-viz --plan-file tfplan               # Visualize specific plan file
+  terraform-viz --tf-path C:\\tools\\tf.exe        # Specify TF executable path
+  terraform-viz --node-padding 1.5               # More spacing between nodes
+  terraform-viz --tf-dir ../dev                  # Use TF files from different directory
         """,
     )
 

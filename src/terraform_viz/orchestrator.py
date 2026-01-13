@@ -1,4 +1,4 @@
-"""Main orchestrator for tfviz."""
+"""Main orchestrator for terraform-viz."""
 
 from pathlib import Path
 

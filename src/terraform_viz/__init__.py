@@ -1,4 +1,4 @@
-"""tfviz - Terraform Infrastructure Visualizer."""
+"""terraform-viz - Terraform Infrastructure Visualizer."""
 
 __version__ = "0.1.0"
 

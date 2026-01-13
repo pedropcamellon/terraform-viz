@@ -1,5 +1,5 @@
 [project]
-name = "tfviz"
+name = "terraform-viz"
 version = "0.1.0"
 description = "A simple, fast CLI tool for generating PNG visualizations of your Terraform infrastructure."
 readme = "README.md"
@@ -24,12 +24,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/tfviz"
-Repository = "https://github.com/yourusername/tfviz"
-Issues = "https://github.com/yourusername/tfviz/issues"
+Homepage = "https://github.com/pedrocamellon/terraform-viz"
+Repository = "https://github.com/pedrocamellon/terraform-viz"
+Issues = "https://github.com/pedrocamellon/terraform-viz/issues"
 
 [project.scripts]
-tfviz = "tfviz.cli:main"
+terraform-viz = "terraform_viz.cli:main"
 
 [build-system]
 requires = ["hatchling"]

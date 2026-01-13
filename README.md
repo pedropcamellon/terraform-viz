@@ -1,14 +1,14 @@
-# tfviz - Terraform Infrastructure Visualizer
+# terraform-viz - Terraform Infrastructure Visualizer
 
-[![PyPI version](https://badge.fury.io/py/tfviz.svg)](https://badge.fury.io/py/tfviz)
-[![Python Support](https://img.shields.io/pypi/pyversions/tfviz.svg)](https://pypi.org/project/tfviz/)
+[![PyPI version](https://badge.fury.io/py/terraform-viz.svg)](https://badge.fury.io/py/terraform-viz)
+[![Python Support](https://img.shields.io/pypi/pyversions/terraform-viz.svg)](https://pypi.org/project/terraform-viz/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A simple, fast CLI tool for generating PNG visualizations of your Terraform infrastructure.
 
 ## Overview
 
-`tfviz` generates visual diagrams showing your Terraform resources, their dependencies, and relationships. Perfect for understanding complex infrastructure, documentation, and identifying potential issues.
+`terraform-viz` generates visual diagrams showing your Terraform resources, their dependencies, and relationships. Perfect for understanding complex infrastructure, documentation, and identifying potential issues.
 
 ## Features
 
@@ -25,16 +25,16 @@ A simple, fast CLI tool for generating PNG visualizations of your Terraform infr
 ### From PyPI (Recommended)
 
 ```bash
-pip install tfviz
+pip install terraform-viz
 # or
-uv add tfviz
+uv add terraform-viz
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/tfviz.git
-cd tfviz
+git clone https://github.com/yourusername/terraform-viz.git
+cd terraform-viz
 uv pip install -e .
 ```
 
@@ -73,7 +73,7 @@ tfviz --node-padding 1.5
 ## Command Line Options
 
 ```
-usage: tfviz [-h] [-o OUTPUT] [--tf-dir TF_DIR] [--tf-path TF_PATH] 
+usage: terraform-viz [-h] [-o OUTPUT] [--tf-dir TF_DIR] [--tf-path TF_PATH] 
              [--keep-dot] [--verbose] [--node-padding NODE_PADDING] 
              [--plan-file PLAN_FILE]
 

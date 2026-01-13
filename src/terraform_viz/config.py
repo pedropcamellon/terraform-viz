@@ -1,4 +1,4 @@
-"""Configuration management for tfviz."""
+"""Configuration management for terraform-viz."""
 
 from dataclasses import dataclass
 from pathlib import Path
