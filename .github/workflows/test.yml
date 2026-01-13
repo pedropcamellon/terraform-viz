@@ -26,10 +26,10 @@ jobs:
       uses: astral-sh/setup-uv@v4
     
     - name: Install dependencies
-      run: uv sync
+      run: uv sync --python ${{ matrix.python-version }}
     
     - name: Test CLI help
-      run: uv run terraform-viz --help
+      run: uv run --python ${{ matrix.python-version }} terraform-viz --help
     
     - name: Test package import
-      run: uv run python -c "from terraform_viz import TFVizConfig, TFVizOrchestrator; print('Import successful')"
+      run: uv run --python ${{ matrix.python-version }} python -c "from terraform_viz import TFVizConfig, TFVizOrchestrator; print('Import successful')"
