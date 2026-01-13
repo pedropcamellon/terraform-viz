@@ -4,6 +4,7 @@ from pathlib import Path
 
 from rich.console import Console
 
+from .ascii_renderer import AsciiRenderer
 from .config import TFVizConfig
 from .executables import ExecutableFinder
 from .file_manager import FileManager
@@ -26,10 +27,12 @@ class TFVizOrchestrator:
         if self.config.verbose:
             console.print("[cyan]>>>[/] Locating required executables...")
 
-        dot_path = ExecutableFinder.find_graphviz()
+        # Graphviz only needed for PNG output
+        dot_path = None if self.config.ascii_output else ExecutableFinder.find_graphviz()
 
         if self.config.verbose:
-            console.print(f"[cyan]>>>[/] Found Graphviz: [white]{dot_path}[/]")
+            if dot_path:
+                console.print(f"[cyan]>>>[/] Found Graphviz: [white]{dot_path}[/]")
             console.print(
                 f"[cyan]>>>[/] Using Terraform: [white]{self.config.tf_path}[/]"
             )
@@ -45,13 +48,22 @@ class TFVizOrchestrator:
             graph_gen = GraphGenerator(self.config.tf_path, self.config.verbose)
             graph_gen.generate(self.config.dot_file_path, self.config.plan_file)
 
-            # Render image
-            renderer = ImageRenderer(dot_path, self.config.verbose)
-            renderer.render(
-                self.config.dot_file_path,
-                self.config.output_path,
-                self.config.node_padding,
-            )
+            # Render to appropriate format
+            if self.config.ascii_output:
+                # Render ASCII diagram
+                renderer = AsciiRenderer(self.config.verbose)
+                renderer.render(
+                    self.config.dot_file_path,
+                    self.config.output_path if not self.config.output_path.suffix == ".png" else None,
+                )
+            else:
+                # Render PNG image
+                renderer = ImageRenderer(dot_path, self.config.verbose)
+                renderer.render(
+                    self.config.dot_file_path,
+                    self.config.output_path,
+                    self.config.node_padding,
+                )
 
             # Cleanup
             if not self.config.keep_dot:
