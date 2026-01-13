@@ -33,7 +33,7 @@ uv add terraform-viz
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/terraform-viz.git
+git clone https://github.com/pedropcamellon/terraform-viz.git
 cd terraform-viz
 uv pip install -e .
 ```
