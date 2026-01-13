@@ -14,15 +14,6 @@ from datetime import datetime
 from pathlib import Path
 
 
-def find_terraform_executable() -> str:
-    """Find terraform executable in PATH."""
-    try:
-        subprocess.run(["terraform", "--version"], capture_output=True, check=True)
-        return "terraform"
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        raise FileNotFoundError("Terraform executable not found in PATH")
-
-
 def find_graphviz_executable() -> str:
     """Find Graphviz dot executable."""
     possible_paths = [
@@ -41,20 +32,26 @@ def find_graphviz_executable() -> str:
     raise FileNotFoundError("Graphviz dot executable not found")
 
 
-def generate_terraform_graph(terraform_path: str, output_file: Path) -> None:
+def generate_tf_graph(tf_path: str, output_file: Path, plan_file: Path = None) -> None:
     """Generate Terraform dependency graph in DOT format."""
-    print("🔄 Generating Terraform graph...")
+    print("🔄 Generating TF graph...")
 
     with open(output_file, "w") as dot_file:
+        if plan_file:
+            cmd = f'{tf_path} graph -plan "{plan_file}"'
+        else:
+            cmd = f"{tf_path} graph"
+
         result = subprocess.run(
-            [terraform_path, "graph"],
+            cmd,
             stdout=dot_file,
             stderr=subprocess.PIPE,
             text=True,
+            shell=True,
         )
 
         if result.returncode != 0:
-            raise RuntimeError(f"Failed to generate Terraform graph: {result.stderr}")
+            raise RuntimeError(f"Failed to generate TF graph: {result.stderr}")
 
 
 def render_png(
@@ -94,11 +91,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  tfviz                             # Generate MMDDYY_HHMM_infra_graph.png in current directory
-  tfviz -o my_infra.png             # Generate with custom output filename  
-  tfviz --node-padding 1.5          # Generate with more spacing between nodes
-  tfviz --keep-dot                  # Keep intermediate DOT file
-  tfviz --terraform-dir ../dev      # Use Terraform files from different directory
+  tfviz                                  # Generate MMDDYY_HHMM_infra_graph.png
+  tfviz -o my_infra.png                  # Custom output filename  
+  tfviz --plan-file tfplan               # Visualize specific plan file
+  tfviz --tf-path C:\\tools\\tf.exe        # Specify TF executable path
+  tfviz --node-padding 1.5               # More spacing between nodes
+  tfviz --tf-dir ../dev                  # Use TF files from different directory
         """,
     )
 
@@ -111,10 +109,17 @@ Examples:
     )
 
     parser.add_argument(
-        "--terraform-dir",
+        "--tf-dir",
         type=Path,
-        default="../infrastructure",
+        default=".",
         help="Directory containing Terraform files (default: current directory)",
+    )
+
+    parser.add_argument(
+        "--tf-path",
+        type=str,
+        default="terraform",
+        help="Path to Terraform executable or alias (default: terraform)",
     )
 
     parser.add_argument(
@@ -134,6 +139,13 @@ Examples:
         help="Spacing between nodes (default: 1.0, larger = more spaced out)",
     )
 
+    parser.add_argument(
+        "--plan-file",
+        type=Path,
+        default=None,
+        help="Path to Terraform plan file to visualize (optional)",
+    )
+
     args = parser.parse_args()
 
     try:
@@ -142,37 +154,37 @@ Examples:
             print("🔍 Locating required executables...")
 
         dot_path = find_graphviz_executable()
-        terraform_path = find_terraform_executable()
+        tf_path = args.tf_path
 
         if args.verbose:
             print(f"✅ Found Graphviz: {dot_path}")
-            print(f"✅ Found Terraform: {terraform_path}")
+            print(f"✅ Using Terraform: {tf_path}")
 
-        # Change to terraform directory if specified
+        # Change to tf directory if specified
         original_dir = Path.cwd()
-        if args.terraform_dir != Path("."):
-            if not args.terraform_dir.exists():
-                print(
-                    f"❌ Error: Terraform directory '{args.terraform_dir}' does not exist"
-                )
+        if args.tf_dir != Path("."):
+            if not args.tf_dir.exists():
+                print(f"❌ Error: Terraform directory '{args.tf_dir}' does not exist")
                 sys.exit(1)
-            os.chdir(args.terraform_dir)
+            os.chdir(args.tf_dir)
             if args.verbose:
-                print(f"📁 Changed to directory: {args.terraform_dir}")
+                print(f"📁 Changed to directory: {args.tf_dir}")
 
         # Generate output filename if not provided
         if args.output is None:
             datetime_prefix = datetime.now().strftime("%m%d%y_%H%M")
             output_filename = f"{datetime_prefix}_infra_graph.png"
-            output_path = original_dir / output_filename
+            output_dir = original_dir / "output"
+            output_dir.mkdir(exist_ok=True)
+            output_path = output_dir / output_filename
         else:
             output_path = (
                 args.output if args.output.is_absolute() else original_dir / args.output
             )
 
         # Generate DOT file
-        dot_file = Path("terraform_graph.dot")
-        generate_terraform_graph(terraform_path, dot_file)
+        dot_file = Path("tf_graph.dot")
+        generate_tf_graph(tf_path, dot_file, args.plan_file)
 
         # Render PNG
         render_png(dot_path, dot_file, output_path, getattr(args, "node_padding"))
@@ -185,7 +197,7 @@ Examples:
 
         print(f"✅ Successfully generated: {output_path}")
 
-        # Show file size
+        # Show file size and details
         if output_path.exists():
             size_mb = output_path.stat().st_size / (1024 * 1024)
             print(f"📊 File size: {size_mb:.2f} MB")
