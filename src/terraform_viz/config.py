@@ -15,6 +15,7 @@ class TFVizConfig:
     node_padding: float
     keep_dot: bool
     verbose: bool
+    ascii_output: bool = False
 
     @property
     def dot_file_path(self) -> Path:

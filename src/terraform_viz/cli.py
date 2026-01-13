@@ -19,7 +19,10 @@ def create_config_from_args(args: argparse.Namespace) -> TFVizConfig:
     # Determine output path
     if args.output is None:
         datetime_prefix = datetime.now().strftime("%m%d%y_%H%M")
-        output_filename = f"{datetime_prefix}_infra_graph.png"
+        if args.ascii:
+            output_filename = f"{datetime_prefix}_infra_graph.txt"
+        else:
+            output_filename = f"{datetime_prefix}_infra_graph.png"
         output_dir = Path.cwd() / "output"
         output_path = output_dir / output_filename
     else:
@@ -33,6 +36,7 @@ def create_config_from_args(args: argparse.Namespace) -> TFVizConfig:
         node_padding=args.node_padding,
         keep_dot=args.keep_dot,
         verbose=args.verbose,
+        ascii_output=args.ascii,
     )
 
 
@@ -79,6 +83,12 @@ Examples:
         "--keep-dot",
         action="store_true",
         help="Keep intermediate DOT file after rendering",
+    )
+
+    parser.add_argument(
+        "--ascii",
+        action="store_true",
+        help="Output ASCII diagram to terminal instead of PNG (perfect for CI/CD)",
     )
 
     parser.add_argument(
