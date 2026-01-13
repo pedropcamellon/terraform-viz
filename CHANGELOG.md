@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-13
+
+### Added
+
+- **ASCII diagram output mode** - Terminal-friendly visualization (now the default!)
+- New `AsciiRenderer` class for DOT-to-ASCII conversion
+- Shows resource hierarchy with tree-style dependency arrows
+- Displays modules, resources, data sources with emoji indicators
+- GitHub Actions workflow for automated PyPI publishing
+- PyPI trusted publishing configuration
+- Comprehensive publishing documentation (PUBLISHING_SETUP.md, DEVELOPMENT.md)
+- Enhanced package metadata with additional classifiers and URLs
+- Improved .gitignore with comprehensive exclusions
+- Examples folder with sample Terraform DOT files
+
+### Changed
+
+- **ASCII is now the default output** - displays diagram in terminal
+- PNG generation now requires `-o` flag to specify output file
+- Graphviz dependency now optional (only required for PNG output)
+- Fixed `--keep-dot` to save DOT files in output directory alongside PNG/TXT
+- Updated CLI help text and welcome screen to reflect ASCII-first approach
+- Enhanced MANIFEST.in to include examples and documentation
+- Updated pyproject.toml with maintainer information and documentation links
+
+### Fixed
+
+- ASCII renderer now correctly parses modern Terraform graph output
+- DOT file parsing supports module subgraphs
+- Module names simplified in ASCII output (removes `module.` prefix)
+
 ## [0.1.1] - 2026-01-13
 
 ### Fixed

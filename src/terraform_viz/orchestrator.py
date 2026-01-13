@@ -41,36 +41,47 @@ class TFVizOrchestrator:
         original_dir = self.file_manager.change_directory(self.config.tf_dir)
 
         try:
-            # Ensure output directory exists
-            self.file_manager.ensure_output_dir(self.config.output_path)
+            # Ensure output directory exists (skip for ASCII-only mode)
+            if self.config.output_path:
+                self.file_manager.ensure_output_dir(self.config.output_path)
 
-            # Generate graph
+            # Generate graph (in current Terraform directory)
+            temp_dot_file = Path("tf_graph.dot")
             graph_gen = GraphGenerator(self.config.tf_path, self.config.verbose)
-            graph_gen.generate(self.config.dot_file_path, self.config.plan_file)
+            graph_gen.generate(temp_dot_file, self.config.plan_file)
+            
+            # Move DOT file to output directory if keeping it
+            if self.config.keep_dot and self.config.output_path:
+                import shutil
+                shutil.move(str(temp_dot_file), str(self.config.dot_file_path))
+                dot_file_to_use = self.config.dot_file_path
+            else:
+                dot_file_to_use = temp_dot_file
 
             # Render to appropriate format
             if self.config.ascii_output:
                 # Render ASCII diagram
                 renderer = AsciiRenderer(self.config.verbose)
                 renderer.render(
-                    self.config.dot_file_path,
-                    self.config.output_path if not self.config.output_path.suffix == ".png" else None,
+                    dot_file_to_use,
+                    None,  # Don't save to file, just print
                 )
             else:
                 # Render PNG image
                 renderer = ImageRenderer(dot_path, self.config.verbose)
                 renderer.render(
-                    self.config.dot_file_path,
+                    dot_file_to_use,
                     self.config.output_path,
                     self.config.node_padding,
                 )
 
-            # Cleanup
-            if not self.config.keep_dot:
-                self.file_manager.cleanup(self.config.dot_file_path)
+            # Cleanup temporary DOT file if not keeping
+            if not self.config.keep_dot and temp_dot_file.exists():
+                self.file_manager.cleanup(temp_dot_file)
 
-            # Report success
-            self._report_success()
+            # Report success (only for PNG output)
+            if not self.config.ascii_output:
+                self._report_success()
 
             return self.config.output_path
 

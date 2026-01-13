@@ -1,19 +1,24 @@
 [project]
 name = "terraform-viz"
-version = "0.1.1"
-description = "A simple, fast CLI tool for generating PNG visualizations of your Terraform infrastructure."
+version = "0.2.0"
+description = "A simple, fast CLI tool for generating ASCII and PNG visualizations of your Terraform infrastructure."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
     { name = "Pedro P. Camellon", email = "pedropcamellon@gmail.com" }
 ]
-keywords = ["terraform", "visualization", "infrastructure", "devops", "cli"]
+maintainers = [
+    { name = "Pedro P. Camellon", email = "pedropcamellon@gmail.com" }
+]
+keywords = ["terraform", "visualization", "infrastructure", "devops", "cli", "diagram", "graphviz"]
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -21,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Build Tools",
     "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
 ]
 dependencies = [
     "rich>=13.7.0",
@@ -29,7 +35,9 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/pedropcamellon/terraform-viz"
 Repository = "https://github.com/pedropcamellon/terraform-viz"
+Documentation = "https://github.com/pedropcamellon/terraform-viz#readme"
 Issues = "https://github.com/pedropcamellon/terraform-viz/issues"
+Changelog = "https://github.com/pedropcamellon/terraform-viz/blob/main/CHANGELOG.md"
 
 [project.scripts]
 terraform-viz = "terraform_viz.cli:main"

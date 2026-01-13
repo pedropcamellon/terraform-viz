@@ -16,17 +16,17 @@ console = Console()
 
 def create_config_from_args(args: argparse.Namespace) -> TFVizConfig:
     """Create configuration from parsed arguments."""
-    # Determine output path
+    # Determine output mode and path
     if args.output is None:
-        datetime_prefix = datetime.now().strftime("%m%d%y_%H%M")
-        if args.ascii:
-            output_filename = f"{datetime_prefix}_infra_graph.txt"
-        else:
-            output_filename = f"{datetime_prefix}_infra_graph.png"
-        output_dir = Path.cwd() / "output"
-        output_path = output_dir / output_filename
+        # Default: ASCII to terminal only
+        output_path = None
+        ascii_output = True
     else:
-        output_path = args.output if args.output.is_absolute() else Path.cwd() / args.output
+        # User specified output file - generate PNG
+        output_path = (
+            args.output if args.output.is_absolute() else Path.cwd() / args.output
+        )
+        ascii_output = False
 
     return TFVizConfig(
         tf_path=args.tf_path,
@@ -36,7 +36,7 @@ def create_config_from_args(args: argparse.Namespace) -> TFVizConfig:
         node_padding=args.node_padding,
         keep_dot=args.keep_dot,
         verbose=args.verbose,
-        ascii_output=args.ascii,
+        ascii_output=ascii_output,
     )
 
 
@@ -44,15 +44,15 @@ def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         prog="tfviz",
-        description="Generate PNG visualization of Terraform infrastructure",
+        description="Generate visualizations of Terraform infrastructure (ASCII by default, PNG with -o)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  terraform-viz                                  # Generate MMDDYY_HHMM_infra_graph.png
-  terraform-viz -o my_infra.png                  # Custom output filename  
+  terraform-viz                                  # Show ASCII diagram in terminal
+  terraform-viz -o my_infra.png                  # Generate PNG file
   terraform-viz --plan-file tfplan               # Visualize specific plan file
   terraform-viz --tf-path C:\\tools\\tf.exe        # Specify TF executable path
-  terraform-viz --node-padding 1.5               # More spacing between nodes
+  terraform-viz --node-padding 1.5 -o out.png    # More spacing between nodes (PNG)
   terraform-viz --tf-dir ../dev                  # Use TF files from different directory
         """,
     )
@@ -62,7 +62,7 @@ Examples:
         "--output",
         type=Path,
         default=None,
-        help="Output PNG filename (default: auto-generated with date prefix)",
+        help="Output PNG file path (default: ASCII to terminal only)",
     )
 
     parser.add_argument(
@@ -83,12 +83,6 @@ Examples:
         "--keep-dot",
         action="store_true",
         help="Keep intermediate DOT file after rendering",
-    )
-
-    parser.add_argument(
-        "--ascii",
-        action="store_true",
-        help="Output ASCII diagram to terminal instead of PNG (perfect for CI/CD)",
     )
 
     parser.add_argument(
@@ -116,37 +110,47 @@ def show_welcome():
     """Display welcome screen with MS-DOS style."""
     from rich.panel import Panel
     from rich.table import Table
-    
+
     console.print()
-    console.print(Panel.fit(
-        "[bold cyan]TERRAFORM-VIZ[/bold cyan]\n"
-        "[white]Infrastructure Visualization Tool[/white]\n"
-        "[dim]v0.1.1[/dim]",
-        border_style="cyan",
-        padding=(1, 2)
-    ))
-    
+    console.print(
+        Panel.fit(
+            "[bold cyan]TERRAFORM-VIZ[/bold cyan]\n"
+            "[white]Infrastructure Visualization Tool[/white]\n"
+            "[dim]v0.1.1[/dim]",
+            border_style="cyan",
+            padding=(1, 2),
+        )
+    )
+
     console.print()
     console.print("[bold white]QUICK START[/bold white]")
-    console.print("[cyan]  >[/] [white]terraform-viz[/]                    [dim]# Generate visualization with auto-name[/]")
-    console.print("[cyan]  >[/] [white]terraform-viz -o infra.png[/]       [dim]# Custom output filename[/]")
-    console.print("[cyan]  >[/] [white]terraform-viz --verbose[/]          [dim]# Show detailed progress[/]")
+    console.print(
+        "[cyan]  >[/] [white]terraform-viz[/]                    [dim]# Show ASCII diagram in terminal[/]"
+    )
+    console.print(
+        "[cyan]  >[/] [white]terraform-viz -o infra.png[/]       [dim]# Generate PNG file[/]"
+    )
+    console.print(
+        "[cyan]  >[/] [white]terraform-viz --verbose[/]          [dim]# Show detailed progress[/]"
+    )
     console.print()
-    
+
     table = Table(show_header=True, header_style="bold cyan", border_style="dim")
     table.add_column("Option", style="yellow")
     table.add_column("Description", style="white")
-    
+
     table.add_row("--help", "Show all available options")
     table.add_row("--tf-path PATH", "Path to terraform executable")
     table.add_row("--tf-dir DIR", "Directory with terraform files")
     table.add_row("--plan-file FILE", "Visualize specific plan file")
     table.add_row("--node-padding N", "Adjust spacing between nodes")
     table.add_row("--keep-dot", "Keep intermediate DOT file")
-    
+
     console.print(table)
     console.print()
-    console.print("[dim]Run with [cyan]--help[/cyan] for detailed usage information[/dim]")
+    console.print(
+        "[dim]Run with [cyan]--help[/cyan] for detailed usage information[/dim]"
+    )
     console.print()
 
 
@@ -156,7 +160,7 @@ def main():
     if len(sys.argv) == 1:
         show_welcome()
         sys.exit(0)
-    
+
     args = parse_arguments()
 
     try:
@@ -167,7 +171,9 @@ def main():
     except FileNotFoundError as e:
         console.print(f"[bold red][ ERROR ][/] {e}")
         if "Graphviz" in str(e):
-            console.print("[yellow][ INFO  ][/] Install Graphviz with: [cyan]winget install graphviz[/]")
+            console.print(
+                "[yellow][ INFO  ][/] Install Graphviz with: [cyan]winget install graphviz[/]"
+            )
         sys.exit(1)
 
     except RuntimeError as e:
@@ -182,6 +188,7 @@ def main():
         console.print(f"[bold red][ ERROR ][/] Unexpected error: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 

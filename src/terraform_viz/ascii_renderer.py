@@ -39,15 +39,15 @@ class AsciiRenderer:
         nodes = []
         edges = []
 
-        # Extract node definitions
-        node_pattern = r'\[root\]\s+([^\[]+?)\s*\[label'
+        # Extract node definitions - matches: "node_name" [label="..."];
+        node_pattern = r'"([^"]+)"\s*\[label\s*='
         for match in re.finditer(node_pattern, dot_content):
-            node = match.group(1).strip().strip('"')
+            node = match.group(1).strip()
             if node and node not in nodes:
                 nodes.append(node)
 
-        # Extract edges
-        edge_pattern = r'"?\[root\]\s+([^"]+?)"?\s*->\s*"?\[root\]\s+([^"]+?)"'
+        # Extract edges - matches: "source" -> "target";
+        edge_pattern = r'"([^"]+)"\s*->\s*"([^"]+)"'
         for match in re.finditer(edge_pattern, dot_content):
             source = match.group(1).strip()
             target = match.group(2).strip()
@@ -69,8 +69,9 @@ class AsciiRenderer:
         resources = [
             n
             for n in nodes
-            if not n.startswith(("provider", "var.", "output.", "data."))
+            if not n.startswith(("provider", "var.", "output.", "data.", "module."))
         ]
+        modules = [n for n in nodes if n.startswith("module.")]
         providers = [n for n in nodes if n.startswith("provider")]
         variables = [n for n in nodes if n.startswith("var.")]
         outputs = [n for n in nodes if n.startswith("output.")]
@@ -102,6 +103,20 @@ class AsciiRenderer:
                         output.append(f"     └─► {dep}")
             output.append("")
 
+        if modules:
+            output.append("MODULES:")
+            for mod in modules:
+                # Simplify module name
+                mod_display = mod.replace("module.", "", 1)
+                output.append(f"  📚 {mod_display}")
+                # Show dependencies
+                deps = [edge[1] for edge in edges if edge[0] == mod]
+                if deps:
+                    for dep in deps:
+                        dep_display = dep.replace("module.", "", 1) if dep.startswith("module.") else dep
+                        output.append(f"     └─► {dep_display}")
+            output.append("")
+
         if resources:
             output.append("RESOURCES:")
             for res in resources:
@@ -110,7 +125,8 @@ class AsciiRenderer:
                 deps = [edge[1] for edge in edges if edge[0] == res]
                 if deps:
                     for dep in deps:
-                        output.append(f"     └─► {dep}")
+                        dep_display = dep.replace("module.", "", 1) if dep.startswith("module.") else dep
+                        output.append(f"     └─► {dep_display}")
             output.append("")
 
         if outputs:
@@ -126,7 +142,7 @@ class AsciiRenderer:
 
         output.append("=" * 80)
         output.append(
-            f"Total: {len(resources)} resources, {len(data_sources)} data sources, {len(edges)} dependencies"
+            f"Total: {len(resources)} resources, {len(modules)} modules, {len(data_sources)} data sources, {len(edges)} dependencies"
         )
         output.append("=" * 80)
 

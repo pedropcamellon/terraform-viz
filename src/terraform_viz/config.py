@@ -10,7 +10,7 @@ class TFVizConfig:
 
     tf_path: str
     tf_dir: Path
-    output_path: Path
+    output_path: Path | None
     plan_file: Path | None
     node_padding: float
     keep_dot: bool
@@ -20,4 +20,10 @@ class TFVizConfig:
     @property
     def dot_file_path(self) -> Path:
         """Get the path for the temporary DOT file."""
-        return Path("tf_graph.dot")
+        # Save DOT file alongside output file
+        if self.output_path and self.output_path.suffix:
+            return self.output_path.with_suffix(".dot")
+        elif self.output_path:
+            return self.output_path.parent / "tf_graph.dot"
+        # Fallback for ASCII mode with no output file
+        return Path.cwd() / "output" / "tf_graph.dot"
