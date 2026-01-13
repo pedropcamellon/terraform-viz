@@ -42,6 +42,7 @@ uv pip install -e .
 
 1. **Terraform** - Must be available in PATH or specify path with `--tf-path`
 2. **Graphviz** - Install with: `winget install graphviz` (Windows) or `brew install graphviz` (macOS)
+   - *Note: Graphviz not required when using `--ascii` mode*
 
 ## Usage
 
@@ -49,32 +50,35 @@ uv pip install -e .
 
 ```bash
 # Basic usage - generates timestamped PNG in output/
-tfviz
+terraform-viz
 
 # Custom output filename  
-tfviz -o infrastructure.png
+terraform-viz -o infrastructure.png
 
 # Work with different Terraform directory
-tfviz --tf-dir ../production
+terraform-viz --tf-dir ../production
 
 # Visualize a specific plan file
-tfviz --plan-file tfplan
+terraform-viz --plan-file tfplan
 
 # Specify custom Terraform executable
-tfviz --tf-path /path/to/terraform
+terraform-viz --tf-path /path/to/terraform
 
 # Verbose output with intermediate files kept
-tfviz -v --keep-dot
+terraform-viz -v --keep-dot
 
 # Adjust spacing between nodes
-tfviz --node-padding 1.5
+terraform-viz --node-padding 1.5
+
+# ASCII output for terminal/CI-CD (no Graphviz needed!)
+terraform-viz --ascii
 ```
 
 ## Command Line Options
 
 ```
 usage: terraform-viz [-h] [-o OUTPUT] [--tf-dir TF_DIR] [--tf-path TF_PATH] 
-             [--keep-dot] [--verbose] [--node-padding NODE_PADDING] 
+             [--keep-dot] [--ascii] [--verbose] [--node-padding NODE_PADDING] 
              [--plan-file PLAN_FILE]
 
 Generate PNG visualization of Terraform infrastructure
@@ -86,6 +90,7 @@ options:
   --tf-dir TF_DIR       Directory containing Terraform files (default: current directory)
   --tf-path TF_PATH     Path to Terraform executable or alias (default: terraform)
   --keep-dot            Keep intermediate DOT file after rendering
+  --ascii               Output ASCII diagram to terminal instead of PNG (perfect for CI/CD)
   --verbose, -v         Enable verbose output
   --node-padding NODE_PADDING
                         Spacing between nodes (default: 1.0, larger = more spaced out)
@@ -95,9 +100,9 @@ options:
 
 ## How It Works
 
-1. **Discovery** - Locates Terraform and Graphviz executables
+1. **Discovery** - Locates Terraform and Graphviz executables (Graphviz skipped in ASCII mode)
 2. **Graph Generation** - Runs `terraform graph` to create DOT format dependency graph
-3. **Rendering** - Uses Graphviz to convert DOT file to PNG
+3. **Rendering** - Converts to PNG (via Graphviz) or ASCII diagram (for terminal output)
 4. **Cleanup** - Optionally removes intermediate files
 
 ## Understanding the Output
@@ -123,11 +128,13 @@ This helps you:
 
 **Terraform not found**:
 
+- Check if Terraform is in PATH: `where terraform` (Windows) or `which terraform` (macOS/Linux)
 - Install Terraform or ensure it's in your PATH
 
 **Graphviz not found**:
 
-- Install Graphviz with: winget install graphviz
+- Check if Graphviz is in PATH: `where dot` (Windows) or `which dot` (macOS/Linux)
+- Install Graphviz with: `winget install graphviz` (Windows) or `brew install graphviz` (macOS)
 
 **Empty visualization**:
 
@@ -148,16 +155,6 @@ Use `-v` flag to see detailed information:
 - File operations
 - Cleanup actions
 
-## File Structure
-
-```
-tfviz/
-├── tfviz.py              # Main CLI tool
-├── README.md             # This documentation
-├── terraform_graph.dot   # Intermediate DOT file (if --keep-dot used)
-└── *.png                 # Generated visualization files
-```
-
 ## Advanced Usage
 
 ### Direct Graphviz Commands
@@ -174,24 +171,7 @@ dot -Tpdf terraform_graph.dot -o graph.pdf
 dot -Tsvg terraform_graph.dot | dot -Tcmapx > graph.map
 ```
 
-### Terraform Directory Structure
-
-When using `--terraform-dir`, the tool works with any directory containing `.tf` files:
-
-```
-project/
-├── infrastructure/
-│   ├── tfviz/              # This tool location
-│   ├── main.tf             # Terraform files here
-│   ├── variables.tf
-│   └── outputs.tf
-├── dev/
-│   └── *.tf                # Dev environment  
-└── production/
-    └── *.tf                # Production environment
-```
-
-Use: `uv run python tfviz.py --terraform-dir ../dev` to visualize dev environment
+Use: `uv run python terraform_viz.py --tf-dir "C:/../dev"` to visualize dev environment
 
 ## Integration
 
@@ -211,3 +191,55 @@ Can be automated in pipelines to:
 - Generate diagrams on infrastructure changes
 - Include in deployment reports
 - Archive infrastructure snapshots
+
+#### ASCII Diagrams for Terminal/CI/CD
+
+For headless environments or CI/CD pipelines, use the built-in `--ascii` flag to render diagrams directly in the terminal instead of Terraform's verbose plan output:
+
+```bash
+# Generate ASCII diagram to terminal
+terraform-viz --ascii
+
+# Save ASCII diagram to file
+terraform-viz --ascii -o infrastructure.txt
+
+# Use with different Terraform directory
+terraform-viz --ascii --tf-dir ../production
+
+# Combine with verbose mode
+terraform-viz --ascii -v
+```
+
+**Benefits:**
+
+- No Graphviz installation required
+- Compact, readable diagrams in terminal output
+- Better alternative to Terraform's verbose plan format
+- Perfect for CI/CD logs and SSH sessions
+- Shows resource hierarchy and dependencies clearly
+
+**Example Output:**
+
+```
+================================================================================
+Terraform Infrastructure Diagram (ASCII)
+================================================================================
+
+VARIABLES:
+  📥 var.instance_type
+
+RESOURCES:
+  📦 aws_instance.web
+     └─► aws_security_group.allow_http
+     └─► aws_subnet.main
+  📦 aws_vpc.main
+     └─► provider[aws]
+
+OUTPUTS:
+  📤 output.instance_ip
+     └─► aws_instance.web
+
+================================================================================
+Total: 4 resources, 0 data sources, 7 dependencies
+================================================================================
+```
