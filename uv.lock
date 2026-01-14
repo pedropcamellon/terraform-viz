@@ -47,7 +47,7 @@ wheels = [
 
 [[package]]
 name = "terraform-viz"
-version = "0.1.2"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "rich" },

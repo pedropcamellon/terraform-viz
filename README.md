@@ -8,17 +8,17 @@ A simple, fast CLI tool for generating PNG visualizations of your Terraform infr
 
 ## Overview
 
-`terraform-viz` generates visual diagrams showing your Terraform resources, their dependencies, and relationships. Perfect for understanding complex infrastructure, documentation, and identifying potential issues.
+`terraform-viz` generates visual diagrams showing your Terraform resources, their dependencies, and relationships. Output to terminal by default for quick review, or generate PNG images for documentation.
 
 ## Features
 
-- 🎨 **PNG output** - High-quality visualizations ready for documentation
+- 📺 **Terminal output** - Rich-formatted diagrams for quick review and CI/CD (default)
+- 🎨 **PNG generation** - High-quality images for documentation (with `-o` flag)
 - 🔍 **Flexible paths** - Work with any Terraform directory
 - 📦 **Plan support** - Visualize specific plan files
 - 🧹 **Clean operation** - Optional intermediate file cleanup
-- 💬 **Verbose mode** - Detailed progress information with Rich formatting
-- ❌ **Error handling** - Clear error messages and suggestions
-- 🎯 **Custom spacing** - Adjustable node padding for optimal layouts
+- 💬 **Verbose mode** - Detailed progress information
+- 🎯 **Custom spacing** - Adjustable node padding for PNG layouts
 
 ## Installation
 
@@ -41,18 +41,18 @@ uv pip install -e .
 ### Prerequisites
 
 1. **Terraform** - Must be available in PATH or specify path with `--tf-path`
-2. **Graphviz** - Only required for PNG output with `-o` flag
-   - Install with: `winget install graphviz` (Windows) or `brew install graphviz` (macOS)
+2. **Graphviz** - Only required for PNG images (with `-o` flag)
+   - Install: `winget install graphviz` (Windows) or `brew install graphviz` (macOS)
 
 ## Usage
 
 ### Quick Start
 
 ```bash
-# Basic usage - generates timestamped PNG in output/
+# Basic usage - shows diagram in terminal
 terraform-viz
 
-# Custom output filename  
+# Generate PNG image for documentation
 terraform-viz -o infrastructure.png
 
 # Work with different Terraform directory
@@ -67,11 +67,8 @@ terraform-viz --tf-path /path/to/terraform
 # Verbose output with intermediate files kept
 terraform-viz -v --keep-dot
 
-# Adjust spacing between nodes
-terraform-viz --node-padding 1.5
-
-# ASCII output for terminal/CI-CD (no Graphviz needed!)
-terraform-viz --ascii
+# Adjust spacing between nodes (PNG only)
+terraform-viz -o output.png --node-padding 1.5
 ```
 
 ## Command Line Options
@@ -81,12 +78,12 @@ usage: terraform-viz [-h] [-o OUTPUT] [--tf-dir TF_DIR] [--tf-path TF_PATH]
              [--keep-dot] [--verbose] [--node-padding NODE_PADDING] 
              [--plan-file PLAN_FILE]
 
-Generate visualizations of Terraform infrastructure (ASCII by default, PNG with -o)
+Generate visualizations of Terraform infrastructure (terminal output by default, PNG with -o)
 
 options:
   -h, --help            show this help message and exit
   -o OUTPUT, --output OUTPUT
-                        Output PNG file path (default: ASCII to terminal only)
+                        Generate PNG image (default: terminal output only)
   --tf-dir TF_DIR       Directory containing Terraform files (default: current directory)
   --tf-path TF_PATH     Path to Terraform executable or alias (default: terraform)
   --keep-dot            Keep intermediate DOT file after rendering
@@ -105,6 +102,50 @@ options:
 4. **Cleanup** - Optionally removes intermediate DOT file
 
 ## Understanding the Output
+
+### Modules vs Resources
+
+**Resources** are the actual infrastructure components you're creating:
+
+- Direct resources in your root Terraform configuration
+- Examples: `azurerm_storage_account.main`, `aws_instance.web`, `random_string.suffix`
+- These are the "real" things that get created in your cloud provider
+
+**Modules** are reusable packages of Terraform configurations:
+
+- Contain multiple resources bundled together
+- Prefixed with `module.` in the graph (e.g., `module.storage.azurerm_storage_account.this`)
+- Help organize and reuse infrastructure patterns
+- Each module creates its own set of resources
+
+### Reading the Hierarchy
+
+The terminal output shows a **parent → child dependency tree**:
+
+- **Parent at top**: Resources that others depend on
+- **Children nested below**: Resources that depend on the parent
+- **Multiple appearances**: A resource may appear multiple times if it has dependencies on different parents
+
+**Example:**
+
+```
+🏗️ azurerm_resource_group.mini (parent)
+├── 📚 cosmos_db.azurerm_cosmosdb_account.this (child)
+│   └── 📦 azurerm_linux_web_app.backend (grandchild)
+```
+
+This means:
+
+- The web app depends on the Cosmos DB account
+- The Cosmos DB account depends on the resource group
+- All must be created in order: resource group → database → web app
+
+**Example:**
+
+```
+module.storage.azurerm_storage_account.this  ← Module resource (inside "storage" module)
+azurerm_resource_group.main                  ← Root resource (in your main config)
+```
 
 ### ASCII Output (Default)
 
@@ -200,63 +241,22 @@ Perfect for including infrastructure diagrams in:
 
 ### CI/CD
 
-Can be automated in pipelines to:
-
-- Generate diagrams on infrastructure changes
-- Include in deployment reports
-- Archive infrastructure snapshots
-
-#### ASCII Diagrams for Terminal/CI/CD
-
-For headless environments or CI/CD pipelines, use the built-in `--ascii` flag to render diagrams directly in the terminal instead of Terraform's verbose plan output:
+Perfect for CI/CD pipelines - ASCII output works great in logs and doesn't require Graphviz:
 
 ```bash
-# Generate ASCII diagram to terminal
-terraform-viz --ascii
+# In your CI/CD pipeline - shows diagram in logs
+terraform-viz --tf-dir ./infrastructure
 
-# Save ASCII diagram to file
-terraform-viz --ascii -o infrastructure.txt
-
-# Use with different Terraform directory
-terraform-viz --ascii --tf-dir ../production
-
-# Combine with verbose mode
-terraform-viz --ascii -v
+# Generate PNG for artifacts
+terraform-viz --tf-dir ./infrastructure -o infrastructure.png
 ```
 
-**Benefits:**
+Can be automated in pipelines to:
 
-- No Graphviz installation required
-- Compact, readable diagrams in terminal output
-- Better alternative to Terraform's verbose plan format
-- Perfect for CI/CD logs and SSH sessions
-- Shows resource hierarchy and dependencies clearly
-
-**Example Output:**
-
-```
-================================================================================
-Terraform Infrastructure Diagram (ASCII)
-================================================================================
-
-VARIABLES:
-  📥 var.instance_type
-
-RESOURCES:
-  📦 aws_instance.web
-     └─► aws_security_group.allow_http
-     └─► aws_subnet.main
-  📦 aws_vpc.main
-     └─► provider[aws]
-
-OUTPUTS:
-  📤 output.instance_ip
-     └─► aws_instance.web
-
-================================================================================
-Total: 4 resources, 0 data sources, 7 dependencies
-================================================================================
-```
+- Display infrastructure changes in build logs
+- Generate PNG diagrams for deployment reports
+- Archive infrastructure snapshots
+- Validate Terraform configurations
 
 ---
 

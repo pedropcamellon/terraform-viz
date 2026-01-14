@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-13
+
+### Added
+
+- **Hierarchical graph display** - Shows true parent→child dependency relationships
+- **Context-aware emojis and colors** - Different resource type icons:
+  - 🏗️ Resource Groups (bright magenta)
+  - 🔑 Role Assignments (bright yellow)
+  - 📚 CosmosDB/Databases (bright cyan)
+  - 💾 Storage Accounts (bright blue)
+  - 📨 Service Bus (blue)
+  - ⚡ Function Apps (yellow)
+  - 📊 Monitoring/Insights (magenta)
+- **Dependency hierarchy explanation** in README with visual examples
+
+### Changed
+
+- **Graph structure reversed** - Parents now shown at top with children nested below
+- Renamed from `AsciiRenderer` to `TerminalRenderer` throughout codebase
+- Replaced "ASCII" terminology with "terminal output" in documentation
+
+### Fixed
+
+- Removed duplicate tree rendering at end of output
+- Removed unused plain text diagram generation method
+
 ## [0.2.0] - 2026-01-13
 
 ### Added

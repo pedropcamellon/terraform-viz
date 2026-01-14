@@ -18,15 +18,15 @@ def create_config_from_args(args: argparse.Namespace) -> TFVizConfig:
     """Create configuration from parsed arguments."""
     # Determine output mode and path
     if args.output is None:
-        # Default: ASCII to terminal only
+        # Default: Terminal output only
         output_path = None
-        ascii_output = True
+        terminal_output = True
     else:
         # User specified output file - generate PNG
         output_path = (
             args.output if args.output.is_absolute() else Path.cwd() / args.output
         )
-        ascii_output = False
+        terminal_output = False
 
     return TFVizConfig(
         tf_path=args.tf_path,
@@ -36,7 +36,7 @@ def create_config_from_args(args: argparse.Namespace) -> TFVizConfig:
         node_padding=args.node_padding,
         keep_dot=args.keep_dot,
         verbose=args.verbose,
-        ascii_output=ascii_output,
+        terminal_output=terminal_output,
     )
 
 
@@ -44,11 +44,11 @@ def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         prog="tfviz",
-        description="Generate visualizations of Terraform infrastructure (ASCII by default, PNG with -o)",
+        description="Generate visualizations of Terraform infrastructure (terminal output by default, PNG with -o)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  terraform-viz                                  # Show ASCII diagram in terminal
+  terraform-viz                                  # Show diagram in terminal
   terraform-viz -o my_infra.png                  # Generate PNG file
   terraform-viz --plan-file tfplan               # Visualize specific plan file
   terraform-viz --tf-path C:\\tools\\tf.exe        # Specify TF executable path

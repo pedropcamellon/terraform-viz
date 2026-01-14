@@ -4,7 +4,7 @@ from pathlib import Path
 
 from rich.console import Console
 
-from .ascii_renderer import AsciiRenderer
+from .terminal_renderer import TerminalRenderer
 from .config import TFVizConfig
 from .executables import ExecutableFinder
 from .file_manager import FileManager
@@ -28,7 +28,7 @@ class TFVizOrchestrator:
             console.print("[cyan]>>>[/] Locating required executables...")
 
         # Graphviz only needed for PNG output
-        dot_path = None if self.config.ascii_output else ExecutableFinder.find_graphviz()
+        dot_path = None if self.config.terminal_output else ExecutableFinder.find_graphviz()
 
         if self.config.verbose:
             if dot_path:
@@ -59,9 +59,9 @@ class TFVizOrchestrator:
                 dot_file_to_use = temp_dot_file
 
             # Render to appropriate format
-            if self.config.ascii_output:
-                # Render ASCII diagram
-                renderer = AsciiRenderer(self.config.verbose)
+            if self.config.terminal_output:
+                # Render terminal diagram
+                renderer = TerminalRenderer(self.config.verbose)
                 renderer.render(
                     dot_file_to_use,
                     None,  # Don't save to file, just print
@@ -80,7 +80,7 @@ class TFVizOrchestrator:
                 self.file_manager.cleanup(temp_dot_file)
 
             # Report success (only for PNG output)
-            if not self.config.ascii_output:
+            if not self.config.terminal_output:
                 self._report_success()
 
             return self.config.output_path

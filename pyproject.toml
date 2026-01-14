@@ -1,7 +1,7 @@
 [project]
 name = "terraform-viz"
-version = "0.2.0"
-description = "A simple, fast CLI tool for generating ASCII and PNG visualizations of your Terraform infrastructure."
+version = "0.3.0"
+description = "A simple, fast CLI tool for generating terminal and PNG visualizations of your Terraform infrastructure."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
