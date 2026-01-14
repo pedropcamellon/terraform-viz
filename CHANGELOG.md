@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] - 2026-01-13
+## [0.3.0] - Hierarchical Graph Visualization
 
 ### Added
 
@@ -31,7 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed duplicate tree rendering at end of output
 - Removed unused plain text diagram generation method
 
-## [0.2.0] - 2026-01-13
+_Released: 2026-01-13_
+
+## [0.2.0] - Terminal-First with Rich Output
 
 ### Added
 
@@ -62,7 +64,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DOT file parsing supports module subgraphs
 - Module names simplified in ASCII output (removes `module.` prefix)
 
-## [0.1.1] - 2026-01-13
+_Released: 2026-01-13_
+
+## [0.1.1] - Python Compatibility Fix
 
 ### Fixed
 
@@ -70,7 +74,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update rich dependency from ==13.7.0 to >=13.7.0
 - Add Python 3.10, 3.11, 3.12 classifiers
 
-## [0.1.0] - 2026-01-13
+_Released: 2026-01-13_
+
+## [0.1.0] - Initial Release
 
 ### Added
 
@@ -82,3 +88,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rich CLI interface with progress indicators
 - Automatic output directory management
 - Verbose mode for detailed execution logs
+
+_Released: 2026-01-13_
